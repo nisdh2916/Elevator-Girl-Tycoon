@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>승강기 운전원 타이쿤 - HTML 발표용 슬라이드</title>
+    <style>
+        @font-face {
+            font-family: 'ChosunIlboMyungjo';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/Chosunilbo_myungjo.woff') format('woff');
+            font-weight: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-color: #1a1212;
+            --panel-bg: #2d2424;
+            --accent-gold: #ffb300;
+            --text-color: #e0e0e0;
+            --elevator-door: #5d4037;
+            --elevator-light: #ffeb3b;
+            --danger-color: #ff5252;
+            --success-color: #76ff03;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'ChosunIlboMyungjo', serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 전체 레이아웃: 왼쪽 슬라이드 / 오른쪽 게임 */
+        #presentation-root {
+            display: flex;
+            width: 1400px;
+            height: 90vh;
+            max-height: 850px;
+            gap: 10px;
+        }
+
+        /* ----- 슬라이드 패널 (좌측) ----- */
+        #slides-panel {
+            flex: 0 0 520px;
+            background: #211717;
+            border: 4px solid #4e342e;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        #slides-header {
+            border-bottom: 2px solid #4e342e;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        #slides-header-title {
+            font-size: 24px;
+            color: var(--accent-gold);
+        }
+
+        #slide-indicator {
+            font-size: 16px;
+            color: #bcaaa4;
+        }
+
+        #slide-title-display {
+            font-size: 18px;
+            color: #ffcc80;
+            margin-bottom: 4px;
+        }
+
+        #slides-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ppt-slide {
+            position: absolute;
+            inset: 0;
+            padding: 12px 4px 4px 4px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease-in-out;
+            overflow-y: auto;
+        }
+
+        .ppt-slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .ppt-slide h2 {
+            font-size: 22px;
+            margin: 4px 0 8px;
+            color: var(--accent-gold);
+        }
+
+        .ppt-slide h3 {
+            font-size: 18px;
+            margin: 8px 0 4px;
+            color: #ffcc80;
+        }
+
+        .ppt-slide p {
+            font-size: 15px;
+            line-height: 1.6;
+            margin: 4px 0;
+        }
+
+        .ppt-slide ul {
+            margin: 4px 0 4px 18px;
+            padding: 0;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .ppt-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid #5d4037;
+            font-size: 13px;
+            margin-right: 4px;
+            background: #3e2723;
+        }
+
+        #slide-controls {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        #slide-controls-left {
+            display: flex;
+            gap: 6px;
+        }
+
+        .slide-nav-btn {
+            padding: 6px 14px;
+            font-family: inherit;
+            font-size: 14px;
+            border-radius: 4px;
+            background: #5d4037;
+            color: #f5f5f5;
+            border: 1px solid #3e2723;
+            cursor: pointer;
+        }
+
+        .slide-nav-btn:hover {
+            background: #4e342e;
+        }
+
+        #slide-controls-hint {
+            font-size: 11px;
+            color: #bcaaa4;
+            text-align: right;
+        }
+
+        /* 슬라이드에서 게임을 제어하기 위한 링크 스타일 */
+        .algo-link {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px 2px 2px 0;
+            font-size: 13px;
+            border-radius: 4px;
+            border: 1px dashed #795548;
+            background: #3e2723;
+            color: #ffcc80;
+            cursor: pointer;
+        }
+
+        .algo-link:hover {
+            background: #4e342e;
+        }
+
+        .inline-label {
+            font-size: 13px;
+            color: #bcaaa4;
+        }
+
+        /* ----- 게임 패널 (우측) ----- */
+        #game-panel {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #game-container {
+            display: flex;
+            width: 780px;
+            height: 90vh;
+            max-height: 800px;
+            background: #000;
+            border: 4px solid #4e342e;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        /* --- Left: Building Simulation (Visual Only) --- */
+        #building-view {
+            width: 160px;
+            position: relative;
+            background: #263238;
+            border-right: 4px solid #4e342e;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .floor {
+            position: relative;
+            width: 100%;
+            height: 50px;
+            border-top: 1px solid #37474f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .floor-label {
+            position: absolute;
+            left: 5px;
+            color: #546e7a;
+            font-size: 20px;
+        }
+
+        #elevator-shaft {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 0;
+            width: 40px;
+            height: 100%;
+            background: #102027;
+            border-left: 2px solid #000;
+            border-right: 2px solid #000;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #elevator-car {
+            position: absolute;
+            left: 2px;
+            bottom: 0;
+            width: 32px;
+            height: 46px;
+            background: var(--elevator-door);
+            border: 2px solid #3e2723;
+            transition: bottom 0.5s linear;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 12px;
+            box-shadow: inset 0 0 5px #000;
+        }
+
+        #elevator-car::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            width: 20px;
+            height: 10px;
+            background: var(--elevator-light);
+            opacity: 0.5;
+        }
+
+        /* --- Right: Operator Interface --- */
+        #control-panel {
+            flex: 1;
+            background: var(--panel-bg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #4e342e;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            margin: 0;
+            color: var(--accent-gold);
+            font-size: 28px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .wave-info {
+            font-size: 18px;
+            color: #bcaaa4;
+        }
+
+        .score-info {
+            font-size: 18px;
+            color: var(--success-color);
+        }
+
+        /* Passenger Interface Area */
+        #passenger-interface {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            min-height: 0;
+        }
+
+        .zone {
+            flex: 1;
+            background: #3e2723;
+            border: 2px solid #5d4037;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .zone-header {
+            background: #4e342e;
+            padding: 10px;
+            font-size: 18px;
+            color: var(--accent-gold);
+            text-align: center;
+            border-bottom: 2px solid #5d4037;
+            display: flex;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .zone-content {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 10px;
+        }
+
+        /* Passenger Cards */
+        .p-card {
+            width: 80px;
+            height: 100px;
+            background: #ffcc80;
+            border: 2px solid #e65100;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.1s;
+            color: #000;
+        }
+
+        .p-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .p-card.group-member {
+            border-width: 3px;
+        }
+
+        .p-dest {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .p-weight {
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .p-group-icon {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+        }
+
+        /* Controls Area */
+        #controls-area {
+            height: 220px;
+            display: flex;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+
+        .control-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .panel-title {
+            color: #bcaaa4;
+            font-size: 16px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .algo-btn {
+            padding: 8px;
+            background: #5d4037;
+            color: #d7ccc8;
+            border: 2px solid #3e2723;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .algo-btn:hover {
+            background: #4e342e;
+        }
+
+        .algo-btn.active {
+            background: var(--accent-gold);
+            color: #1a1212;
+            border-color: #fff;
+        }
+
+        #action-btn {
+            padding: 12px;
+            font-size: 20px;
+            font-family: inherit;
+            background: #2e7d32;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #1b5e20;
+            margin-top: auto;
+        }
+
+        #preview-btn {
+            padding: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            background: #0277bd;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #01579b;
+            margin-bottom: 10px;
+        }
+
+        #action-btn:active,
+        #preview-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        #action-btn:disabled,
+        #preview-btn:disabled {
+            background: #555;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        #game-log {
+            background: #000;
+            border: 2px solid #333;
+            padding: 8px;
+            font-size: 12px;
+            color: #00e676;
+            font-family: 'Consolas', monospace;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        /* Overlay와 게임오버 모달은 game-panel 기준으로 */
+        #overlay {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            left: 8px;
+            bottom: 8px;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        #overlay h2 {
+            font-size: 36px;
+            color: var(--accent-gold);
+            margin-bottom: 16px;
+        }
+
+        #overlay p {
+            font-size: 18px;
+            max-width: 500px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        #start-btn {
+            padding: 14px 40px;
+            font-size: 24px;
+            background: var(--accent-gold);
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        #game-over-modal {
+            display: none;
+            position: absolute;
+            top: 50%;
+            right: 50%;
+            transform: translate(50%, -50%);
+            background: #2d2424;
+            border: 4px solid var(--accent-gold);
+            padding: 24px;
+            text-align: center;
+            z-index: 200;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+            width: 420px;
+        }
+
+        #game-over-modal h2 {
+            color: var(--danger-color);
+            font-size: 32px;
+            margin: 0 0 16px 0;
+        }
+
+        #final-score {
+            font-size: 28px;
+            color: var(--success-color);
+            margin-bottom: 16px;
+        }
+
+        .initials-input {
+            background: #000;
+            border: 2px solid #5d4037;
+            color: var(--accent-gold);
+            font-size: 32px;
+            width: 180px;
+            text-align: center;
+            font-family: inherit;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        #submit-score-btn {
+            padding: 10px 26px;
+            font-size: 18px;
+            background: var(--accent-gold);
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        #leaderboard {
+            margin-top: 18px;
+            text-align: left;
+            border-top: 2px solid #5d4037;
+            padding-top: 12px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .rank-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: #bcaaa4;
+        }
+
+        .rank-row.top {
+            color: var(--accent-gold);
+            font-weight: bold;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1212;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #5d4037;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="presentation-root">
+        <!-- ===== 좌측: PPT 스타일 슬라이드 ===== -->
+        <div id="slides-panel">
+            <div id="slides-header">
+                <div id="slides-header-title">승강기 운전원 타이쿤</div>
+                <div id="slide-indicator">1 / 5</div>
+            </div>
+            <div id="slide-title-display">게임 개요</div>
+            <div id="slides-container">
+                <!-- 슬라이드 1: 개요 -->
+                <section class="ppt-slide active" data-title="게임 개요">
+                    <h2>1. 프로젝트 개요</h2>
+                    <p>
+                        <span class="ppt-badge">알고리즘 시뮬레이터</span>
+                        <span class="ppt-badge">HTML 게임</span>
+                    </p>
+                    <p>
+                        본 프로젝트는 <b>승강기 운전원</b>의 입장에서 승객을 태우고,
+                        <b>선택한 알고리즘에 따라 이동 경로를 자동 계산</b>해주는
+                        <b>웹 기반 교육용 게임</b>입니다.
+                    </p>
+                    <h3>핵심 목표</h3>
+                    <ul>
+                        <li>엘리베이터 운행 문제를 통해 <b>경로 최적화 알고리즘</b>을 직관적으로 이해</li>
+                        <li>정원/하중/그룹 승객 등 <b>제약 조건을 고려한 의사결정</b> 체험</li>
+                        <li>브라우저만으로 실행 가능한 <b>경량 HTML/CSS/JS 게임</b> 구현</li>
+                    </ul>
+                </section>
+
+                <!-- 슬라이드 2: 게임 규칙 -->
+                <section class="ppt-slide" data-title="게임 규칙 및 점수">
+                    <h2>2. 게임 규칙</h2>
+                    <h3>기본 설정</h3>
+                    <ul>
+                        <li>층 수: <b>15층</b> 건물</li>
+                        <li>정원: <b>8명</b>, 최대 하중: <b>800kg</b></li>
+                        <li><b>웨이브(Wave) 5회</b> 동안 승객을 운송</li>
+                    </ul>
+                    <h3>승객 규칙</h3>
+                    <ul>
+                        <li>랜덤 목적층과 몸무게(60~130kg)를 가진 승객 생성</li>
+                        <li><b>그룹 승객</b>은 같은 색으로 표시되며, <b>항상 같이 탑승/하차</b></li>
+                        <li>승객 카드를 클릭하여 승강기 탑승/대기실 이동</li>
+                    </ul>
+                    <h3>점수 시스템</h3>
+                    <ul>
+                        <li><b>웨이브 점수</b> = (이동 승객 수 × 500점) − (이동 거리 × 10점)</li>
+                        <li>총점 = 모든 웨이브 점수 합</li>
+                        <li><span class="inline-label">👉 오른쪽 게임에서 직접 탑승/운행해 보면서 점수 변화를 확인할 수 있습니다.</span></li>
+                    </ul>
+                </section>
+
+                <!-- 슬라이드 3: 알고리즘 -->
+                <section class="ppt-slide" data-title="탑승 알고리즘 비교">
+                    <h2>3. 이동 알고리즘</h2>
+                    <p>승강기가 어떤 순서로 층을 방문할지 <b>알고리즘</b>으로 결정합니다.</p>
+
+                    <h3>알고리즘 선택 (슬라이드에서 직접 제어)</h3>
+                    <p>
+                        <button class="algo-link" data-select-algo="greedy">
+                            탐욕적 기법 (Greedy)
+                        </button>
+                        – 현재 층에서 <b>가장 가까운 목적층</b>부터 차례로 방문
+                    </p>
+                    <p>
+                        <button class="algo-link" data-select-algo="divide">
+                            분할 정복 (Divide & Conquer)
+                        </button>
+                        – 현재 층 기준으로 <b>위/아래 층을 나누어</b> 한쪽 방향을 먼저 처리
+                    </p>
+                    <p>
+                        <button class="algo-link" data-select-algo="bnb">
+                            분기 한정 (Branch &amp; Bound)
+                        </button>
+                        – 가능한 모든 경로를 탐색하되,
+                        <b>가지치기(Pruning)</b>로 <b>최소 이동 거리</b> 경로만 선택
+                    </p>
+
+                    <h3>미리보기 기능</h3>
+                    <ul>
+                        <li>승객을 태운 후 <b>“경로 미리보기”</b> 버튼 클릭</li>
+                        <li>선택한 알고리즘에 따른 <b>방문 순서</b>가 로그에 출력</li>
+                        <li><span class="inline-label">👉 위 버튼을 눌러 알고리즘을 바꾸고, 오른쪽에서 바로 미리보기를 시연할 수 있습니다.</span></li>
+                    </ul>
+                </section>
+
+                <!-- 슬라이드 4: 구현 구조 -->
+                <section class="ppt-slide" data-title="구현 구조">
+                    <h2>4. 구현 구조 (코드 관점)</h2>
+                    <h3>상태(State)</h3>
+                    <ul>
+                        <li><code>currentFloor</code>: 현재 층 (초기 8층)</li>
+                        <li><code>waveCount</code>: 현재 웨이브 번호 (1~5)</li>
+                        <li><code>passengers[]</code>: 승객 정보 (목적층, 몸무게, 그룹 ID, 상태 등)</li>
+                        <li><code>totalScore</code>, <code>waveDistance</code>: 점수 및 이동 거리 기록</li>
+                    </ul>
+                    <h3>핵심 함수</h3>
+                    <ul>
+                        <li><b><code>startWave()</code></b> – 웨이브 시작, 승객 생성</li>
+                        <li><b><code>togglePassenger()</code></b> – 승객 탑승/하차 및 제약 조건 검사</li>
+                        <li><b><code>solvePath(algo, start, boarded)</code></b> – 알고리즘별 경로 계산</li>
+                        <li><b><code>animateElevator(path)</code></b> – 실제 엘리베이터 이동 애니메이션</li>
+                    </ul>
+                    <p>
+                        <span class="inline-label"></span>
+                    </p>
+                </section>
+
+                <!-- 슬라이드 5: 데모 안내 -->
+                <section class="ppt-slide" data-title="데모 시연 포인트">
+                    <h2>5. 데모 시연 포인트</h2>
+                    <h3>1) 기본 운행 시연</h3>
+                    <ul>
+                        <li>대기실 승객 몇 명을 선택하여 승강기에 탑승</li>
+                        <li><b>정원/하중 초과</b> 메시지와 효과음 확인</li>
+                        <li><b>Greedy</b> 알고리즘으로 한 번 운행</li>
+                    </ul>
+
+                    <h3>2) 알고리즘 비교 시연</h3>
+                    <ul>
+                        <li>같은 승객 구성을 두고, <b>Greedy / Divide &amp; Conquer / Branch &amp; Bound</b> 순으로 비교</li>
+                        <li>각 알고리즘 선택은 <b>슬라이드의 버튼</b> 또는 오른쪽 게임 내부 버튼으로 변경</li>
+                        <li>로그 영역에서 <b>경로 차이와 이동 거리</b>를 같이 보여주기</li>
+                    </ul>
+
+                    <h3>3) 점수 / 랭킹</h3>
+                    <ul>
+                        <li>웨이브 종료 후 점수 계산 방식 설명</li>
+                        <li>모든 웨이브 종료 시 <b>GAME OVER &amp; 이니셜 입력</b> 시연</li>
+                        <li><b>브라우저 localStorage</b>를 이용한 간단한 리더보드 구현 설명</li>
+                    </ul>
+                </section>
+            </div>
+            <div id="slide-controls">
+                <div id="slide-controls-left">
+                    <button class="slide-nav-btn" id="prev-slide-btn">◀ 이전</button>
+                    <button class="slide-nav-btn" id="next-slide-btn">다음 ▶</button>
+                </div>
+                <div id="slide-controls-hint">
+                    방향키 <b>← / →</b> 로도 슬라이드를 넘길 수 있습니다.
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 우측: 실제 게임 ===== -->
+        <div id="game-panel">
+            <div id="game-container">
+                <!-- Left: Simulation -->
+                <div id="building-view">
+                    <div id="elevator-shaft">
+                        <div id="elevator-car"></div>
+                    </div>
+                    <!-- Floors generated by JS -->
+                </div>
+
+                <!-- Right: Interface -->
+                <div id="control-panel">
+                    <header>
+                        <h1>승강기 운전원 타이쿤</h1>
+                        <div class="score-info">점수: <span id="score-display">0</span></div>
+                        <div class="wave-info">웨이브 <span id="wave-num">1</span>/5</div>
+                    </header>
+
+                    <!-- Passenger Selection Area -->
+                    <div id="passenger-interface">
+                        <!-- Platform -->
+                        <div class="zone" id="platform-zone">
+                            <div class="zone-header">
+                                <span>대기실 </span>
+                                <span id="waiting-count">0</span>
+                            </div>
+                            <div class="zone-content" id="platform-content">
+                                <!-- Passengers go here -->
+                            </div>
+                        </div>
+
+                        <!-- Elevator -->
+                        <div class="zone" id="elevator-zone">
+                            <div class="zone-header">
+                                <span>승강기(<span id="current-floor-display">1F</span>)</span>
+                                <span>
+                                    <span id="capacity-display">0/8</span> |
+                                    <span id="weight-display">0/800kg</span>
+                                </span>
+                            </div>
+                            <div class="zone-content" id="elevator-content">
+                                <!-- Boarded passengers go here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div id="controls-area">
+                        <div class="control-col">
+                            <div class="panel-title">알고리즘 선택</div>
+                            <button class="algo-btn active" data-algo="greedy">탐욕적 기법 (Greedy)</button>
+                            <button class="algo-btn" data-algo="divide">분할 정복 (Divide & Conquer)</button>
+                            <button class="algo-btn" data-algo="bnb">분기 한정 (Branch &amp; Bound)</button>
+                        </div>
+                        <div class="control-col">
+                            <div class="panel-title">로그</div>
+                            <div id="game-log"></div>
+                        </div>
+                        <div class="control-col" style="flex: 0.8;">
+                            <button id="preview-btn">경로 미리보기</button>
+                            <button id="action-btn">출발</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 게임 오버레이 & 모달 -->
+            <div id="overlay">
+                <h2>승강기 운전원 타이쿤</h2>
+                <p>
+                    <b>운전원 매뉴얼:</b><br><br>
+                    1. <b>대기실</b>에서 승객을 선택하여 탑승시키세요.<br>
+                    2. <b>같은 색상의 그룹</b>은 함께 탑승해야 합니다.<br>
+                    3. <b>정원</b>과 <b>하중</b> 제한을 주의하세요.<br>
+                    4. 최적의 경로를 위한 <b>알고리즘</b>을 선택하세요.<br>
+                    5. <b>미리보기</b>를 확인하고 <b>출발</b> 버튼을 누르세요.<br><br>
+                    <span style="color: var(--success-color); font-size: 0.9em;">
+                        * <b>점수</b> = (이동 승객 × 500) - (이동 거리 × 10)
+                    </span><br>
+                </p>
+                <button id="start-btn">운행 시작</button>
+            </div>
+
+            <div id="game-over-modal">
+                <h2>GAME OVER</h2>
+                <div id="final-score">0점</div>
+                <input type="text" class="initials-input" maxlength="3" placeholder="AAA"
+                    oninput="this.value = this.value.toUpperCase()">
+                <br>
+                <button id="submit-score-btn">점수 등록</button>
+
+                <div id="leaderboard">
+                    <!-- Ranks go here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ===== 슬라이드 네비게이션 로직 ===== */
+        const slides = document.querySelectorAll('.ppt-slide');
+        const slideTitleDisplay = document.getElementById('slide-title-display');
+        const slideIndicator = document.getElementById('slide-indicator');
+        const prevSlideBtn = document.getElementById('prev-slide-btn');
+        const nextSlideBtn = document.getElementById('next-slide-btn');
+
+        let currentSlideIndex = 0;
+
+        function updateSlideUI() {
+            slides.forEach((s, i) => {
+                s.classList.toggle('active', i === currentSlideIndex);
+            });
+            const active = slides[currentSlideIndex];
+            slideTitleDisplay.textContent = active.dataset.title || '';
+            slideIndicator.textContent = (currentSlideIndex + 1) + ' / ' + slides.length;
+        }
+
+        function gotoSlide(index) {
+            if (index < 0 || index >= slides.length) return;
+            currentSlideIndex = index;
+            updateSlideUI();
+        }
+
+        prevSlideBtn.addEventListener('click', () => {
+            gotoSlide(currentSlideIndex - 1);
+        });
+
+        nextSlideBtn.addEventListener('click', () => {
+            gotoSlide(currentSlideIndex + 1);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                gotoSlide(currentSlideIndex + 1);
+            } else if (e.key === 'ArrowLeft') {
+                gotoSlide(currentSlideIndex - 1);
+            }
+        });
+
+        updateSlideUI();
+
+        /* ===== 기존 게임 로직 (약간만 수정) ===== */
+        const FLOORS = 15;
+        const MAX_PEOPLE = 8;
+        const MAX_WEIGHT = 800;
+        const FLOOR_HEIGHT = 50;
+        const MAX_WAVES = 5;
+
+        const AudioContextCls = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContextCls();
+
+        function playTone(freq, type, duration) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        const sfx = {
+            ding: () => playTone(523.25, 'sine', 0.8),
+            move: () => playTone(100, 'sawtooth', 0.1),
+            error: () => playTone(150, 'square', 0.3),
+            click: () => playTone(800, 'triangle', 0.05),
+            board: () => playTone(400, 'sine', 0.1),
+            win: () => {
+                playTone(523.25, 'square', 0.1);
+                setTimeout(() => playTone(659.25, 'square', 0.1), 100);
+                setTimeout(() => playTone(783.99, 'square', 0.2), 200);
+            }
+        };
+
+        let currentFloor = 8;
+        let waveCount = 1;
+        let isMoving = false;
+        let totalScore = 0;
+        let waveDistance = 0;
+        let passengers = [];
+
+        const buildingView = document.getElementById('building-view');
+        const elevatorCar = document.getElementById('elevator-car');
+        const platformContent = document.getElementById('platform-content');
+        const elevatorContent = document.getElementById('elevator-content');
+        const capacityDisplay = document.getElementById('capacity-display');
+        const weightDisplay = document.getElementById('weight-display');
+        const logDiv = document.getElementById('game-log');
+        const actionBtn = document.getElementById('action-btn');
+        const previewBtn = document.getElementById('preview-btn');
+        const algoBtns = document.querySelectorAll('.algo-btn');
+        const currentFloorDisplay = document.getElementById('current-floor-display');
+        const waitingCountDisplay = document.getElementById('waiting-count');
+        const scoreDisplay = document.getElementById('score-display');
+        const waveNumDisplay = document.getElementById('wave-num');
+
+        const gameOverModal = document.getElementById('game-over-modal');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const initialsInput = document.querySelector('.initials-input');
+        const submitScoreBtn = document.getElementById('submit-score-btn');
+        const leaderboardDiv = document.getElementById('leaderboard');
+
+        /* 게임 초기화 */
+        function initGame() {
+            currentFloor = 8;
+            waveCount = 1;
+            totalScore = 0;
+            isMoving = false;
+            scoreDisplay.textContent = 0;
+
+            const shaft = document.getElementById('elevator-shaft');
+            buildingView.innerHTML = '';
+            if (shaft) buildingView.appendChild(shaft);
+
+            for (let i = 1; i <= FLOORS; i++) {
+                const f = document.createElement('div');
+                f.className = 'floor';
+                f.id = `floor-${i}`;
+
+                const label = document.createElement('div');
+                label.className = 'floor-label';
+                label.textContent = `${i}F`;
+
+                f.appendChild(label);
+                buildingView.appendChild(f);
+            }
+
+            updateElevatorVisual(currentFloor);
+            startWave();
+        }
+
+        function startWave() {
+            if (waveCount > MAX_WAVES) {
+                endGame();
+                return;
+            }
+
+            log(`>>> 웨이브 ${waveCount}/${MAX_WAVES} 시작 (현재 ${currentFloor}층) <<<`);
+            waveNumDisplay.textContent = waveCount;
+            waveDistance = 0;
+
+            passengers = [];
+            const count = Math.floor(Math.random() * 5) + 3; // 3-7
+
+            for (let i = 0; i < count; i++) {
+                const isGroup = Math.random() < 0.3;
+                const groupSize = isGroup ? 2 : 1;
+                const dest = getRandomFloor(currentFloor);
+                const groupId = isGroup ? `g-${Date.now()}-${i}` : null;
+                const groupColor = isGroup ? getGroupColor(i) : '#ffcc80';
+
+                for (let g = 0; g < groupSize; g++) {
+                    passengers.push({
+                        id: `${i}-${g}`,
+                        dest: dest,
+                        weight: Math.floor(Math.random() * 70) + 60,
+                        status: 'waiting',
+                        groupId: groupId,
+                        color: groupColor
+                    });
+                }
+            }
+
+            renderInterface();
+            actionBtn.disabled = false;
+            previewBtn.disabled = false;
+            actionBtn.textContent = "출발";
+            sfx.ding();
+        }
+
+        function endGame() {
+            sfx.win();
+            gameOverModal.style.display = 'block';
+            finalScoreDisplay.textContent = `${totalScore}점`;
+            initialsInput.value = '';
+            initialsInput.disabled = false;
+            submitScoreBtn.disabled = false;
+            loadLeaderboard();
+        }
+
+        function getRandomFloor(exclude) {
+            let f = exclude;
+            while (f === exclude) f = Math.floor(Math.random() * FLOORS) + 1;
+            return f;
+        }
+
+        function getGroupColor(seed) {
+            const hues = [0, 60, 120, 180, 240, 300];
+            const hue = hues[seed % hues.length];
+            return `hsl(${hue}, 70%, 80%)`;
+        }
+
+        function renderInterface() {
+            platformContent.innerHTML = '';
+            elevatorContent.innerHTML = '';
+
+            const waiting = passengers.filter(p => p.status === 'waiting');
+            const boarded = passengers.filter(p => p.status === 'boarded');
+
+            currentFloorDisplay.textContent = `${currentFloor}F`;
+            waitingCountDisplay.textContent = waiting.length;
+            scoreDisplay.textContent = totalScore;
+
+            const totalWeight = boarded.reduce((sum, p) => sum + p.weight, 0);
+            capacityDisplay.textContent = `${boarded.length}/${MAX_PEOPLE}`;
+            weightDisplay.textContent = `${totalWeight}/${MAX_WEIGHT}kg`;
+
+            if (totalWeight > MAX_WEIGHT) weightDisplay.style.color = 'var(--danger-color)';
+            else weightDisplay.style.color = 'var(--accent-gold)';
+
+            waiting.forEach(p => createCard(p, platformContent));
+            boarded.forEach(p => createCard(p, elevatorContent));
+        }
+
+        function createCard(p, container) {
+            const card = document.createElement('div');
+            card.className = 'p-card';
+            card.style.backgroundColor = p.color;
+            if (p.groupId) {
+                card.classList.add('group-member');
+                card.style.borderColor = '#000';
+
+                const icon = document.createElement('div');
+                icon.className = 'p-group-icon';
+                icon.style.backgroundColor = p.color;
+                card.appendChild(icon);
+            }
+
+            const dest = document.createElement('div');
+            dest.className = 'p-dest';
+            dest.textContent = p.dest;
+
+            const weight = document.createElement('div');
+            weight.className = 'p-weight';
+            weight.textContent = `${p.weight}kg`;
+
+            card.appendChild(dest);
+            card.appendChild(weight);
+
+            card.onclick = () => togglePassenger(p);
+            container.appendChild(card);
+        }
+
+        function togglePassenger(p) {
+            if (isMoving) return;
+
+            const targetPassengers = p.groupId
+                ? passengers.filter(x => x.groupId === p.groupId)
+                : [p];
+
+            const isBoarding = (p.status === 'waiting');
+
+            if (isBoarding) {
+                const boarded = passengers.filter(x => x.status === 'boarded');
+                const currentWeight = boarded.reduce((sum, x) => sum + x.weight, 0);
+
+                const addCount = targetPassengers.length;
+                const addWeight = targetPassengers.reduce((sum, x) => sum + x.weight, 0);
+
+                if (boarded.length + addCount > MAX_PEOPLE) {
+                    log("정원 초과!"); sfx.error(); return;
+                }
+                if (currentWeight + addWeight > MAX_WEIGHT) {
+                    log("하중 초과!"); sfx.error(); return;
+                }
+
+                targetPassengers.forEach(tp => tp.status = 'boarded');
+                sfx.board();
+            } else {
+                targetPassengers.forEach(tp => tp.status = 'waiting');
+                sfx.click();
+            }
+
+            renderInterface();
+        }
+
+        function getSelectedAlgo() {
+            const active = document.querySelector('.algo-btn.active');
+            return active ? active.dataset.algo : 'greedy';
+        }
+
+        // 슬라이드에서 알고리즘 변경할 수 있도록 함수 분리
+        function setAlgo(algo) {
+            if (isMoving) return;
+            algoBtns.forEach(b => {
+                if (b.dataset.algo === algo) b.classList.add('active');
+                else b.classList.remove('active');
+            });
+            sfx.click();
+            log(`[슬라이드] 알고리즘 변경: ${algo.toUpperCase()}`);
+        }
+
+        function solvePath(algo, start, boarded) {
+            const destinations = [...new Set(boarded.map(p => p.dest))];
+            if (destinations.length === 0) return [];
+
+            if (algo === 'greedy') {
+                let current = start;
+                let remaining = [...destinations];
+                const path = [];
+                while (remaining.length > 0) {
+                    remaining.sort((a, b) => Math.abs(a - current) - Math.abs(b - current));
+                    const next = remaining.shift();
+                    path.push(next);
+                    current = next;
+                }
+                return path;
+
+            } else if (algo === 'divide') {
+                const sorted = [...destinations].sort((a, b) => a - b);
+                const lower = sorted.filter(x => x < start).sort((a, b) => b - a);
+                const upper = sorted.filter(x => x > start).sort((a, b) => a - b);
+                if (Math.abs(start - (lower[0] || 999)) < Math.abs(start - (upper[0] || 999))) {
+                    return [...lower, ...upper];
+                } else {
+                    return [...upper, ...lower];
+                }
+
+            } else if (algo === 'bnb') {
+                let bestPath = null;
+                let minCost = Infinity;
+
+                function search(currentFloor, visited, currentPath, currentCost) {
+                    if (currentCost >= minCost) return;
+
+                    if (visited.length === destinations.length) {
+                        if (currentCost < minCost) {
+                            minCost = currentCost;
+                            bestPath = [...currentPath];
+                        }
+                        return;
+                    }
+
+                    for (const dest of destinations) {
+                        if (!visited.includes(dest)) {
+                            const dist = Math.abs(dest - currentFloor);
+                            search(dest, [...visited, dest], [...currentPath, dest], currentCost + dist);
+                        }
+                    }
+                }
+
+                search(start, [], [], 0);
+                return bestPath;
+            }
+
+            return [];
+        }
+
+        function showPreview() {
+            if (isMoving) return;
+            const boarded = passengers.filter(p => p.status === 'boarded');
+            if (boarded.length === 0) {
+                log("탑승한 승객이 없습니다.");
+                return;
+            }
+            const algo = getSelectedAlgo();
+            const path = solvePath(algo, currentFloor, boarded);
+            log(`[미리보기] ${algo.toUpperCase()}: ${currentFloor} -> ${path.join(' -> ')}`);
+        }
+
+        previewBtn.addEventListener('click', showPreview);
+
+        actionBtn.addEventListener('click', () => {
+            if (isMoving) return;
+            const boarded = passengers.filter(p => p.status === 'boarded');
+            if (boarded.length === 0) {
+                log("탑승한 승객이 없습니다!"); sfx.error(); return;
+            }
+
+            isMoving = true;
+            actionBtn.disabled = true;
+            previewBtn.disabled = true;
+            actionBtn.textContent = "운행 중...";
+
+            const algo = getSelectedAlgo();
+            const path = solvePath(algo, currentFloor, boarded);
+
+            log(`알고리즘: ${algo.toUpperCase()} | 경로: ${currentFloor} -> ${path.join(' -> ')}`);
+            animateElevator(path);
+        });
+
+        async function animateElevator(path) {
+            for (const dest of path) {
+                sfx.move();
+                await moveElevatorTo(dest);
+                sfx.ding();
+                log(`${dest}층 도착.`);
+
+                const leaving = passengers.filter(p => p.status === 'boarded' && p.dest === dest);
+                leaving.forEach(p => p.status = 'delivered');
+
+                renderInterface();
+                await sleep(600);
+            }
+
+            const deliveredCount = passengers.filter(p => p.status === 'delivered').length;
+            const waveScore = (deliveredCount * 500) - (waveDistance * 10);
+            totalScore += waveScore;
+            scoreDisplay.textContent = totalScore;
+
+            const efficiency = deliveredCount > 0 ? waveScore / deliveredCount : 0;
+            let rank = 'C';
+            if (efficiency >= 450) rank = 'S';
+            else if (efficiency >= 400) rank = 'A';
+            else if (efficiency >= 300) rank = 'B';
+
+            log(`[평가] 점수: ${waveScore}점 | 거리: ${waveDistance}층 | 등급: ${rank}`);
+
+            log("운행 완료. 대기 위치로 이동합니다...");
+            await sleep(500);
+
+            const restFloor = Math.floor(Math.random() * 6) + 5;
+            await moveElevatorTo(restFloor);
+            log(`대기 위치(${restFloor}층) 도착.`);
+
+            isMoving = false;
+            waveCount++;
+            setTimeout(startWave, 1000);
+        }
+
+        function moveElevatorTo(target) {
+            return new Promise(resolve => {
+                const dist = Math.abs(target - currentFloor);
+                waveDistance += dist;
+
+                const duration = dist * 400;
+
+                elevatorCar.style.transition = `bottom ${duration}ms linear`;
+                elevatorCar.style.bottom = `${(target - 1) * FLOOR_HEIGHT}px`;
+
+                currentFloor = target;
+                setTimeout(resolve, duration);
+            });
+        }
+
+        function updateElevatorVisual(floor) {
+            elevatorCar.style.bottom = `${(floor - 1) * FLOOR_HEIGHT}px`;
+        }
+
+        function log(msg) {
+            const div = document.createElement('div');
+            div.textContent = `> ${msg}`;
+            logDiv.appendChild(div);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        algoBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (isMoving) return;
+                algoBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                sfx.click();
+            });
+        });
+
+        function loadLeaderboard() {
+            const scores = JSON.parse(localStorage.getItem('elevator_scores') || '[]');
+            leaderboardDiv.innerHTML = '';
+
+            scores.slice(0, 5).forEach((s, i) => {
+                const row = document.createElement('div');
+                row.className = `rank-row ${i === 0 ? 'top' : ''}`;
+                row.innerHTML = `<span>${i + 1}. ${s.name}</span> <span>${s.score}</span>`;
+                leaderboardDiv.appendChild(row);
+            });
+        }
+
+        submitScoreBtn.addEventListener('click', () => {
+            const name = initialsInput.value.toUpperCase();
+            if (name.length < 3) {
+                alert("이니셜 3글자를 입력해주세요!");
+                return;
+            }
+
+            const scores = JSON.parse(localStorage.getItem('elevator_scores') || '[]');
+            scores.push({ name: name, score: totalScore });
+            scores.sort((a, b) => b.score - a.score);
+            localStorage.setItem('elevator_scores', JSON.stringify(scores));
+
+            loadLeaderboard();
+            submitScoreBtn.disabled = true;
+            initialsInput.disabled = true;
+
+            const restartBtn = document.createElement('button');
+            restartBtn.textContent = "다시 하기";
+            restartBtn.style.marginTop = "16px";
+            restartBtn.style.padding = "8px 18px";
+            restartBtn.style.fontSize = "16px";
+            restartBtn.style.background = "#2e7d32";
+            restartBtn.style.color = "#fff";
+            restartBtn.style.border = "none";
+            restartBtn.style.cursor = "pointer";
+            restartBtn.onclick = () => location.reload();
+            gameOverModal.appendChild(restartBtn);
+        });
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('overlay').style.display = 'none';
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            initGame();
+        });
+
+        /* 슬라이드 → 게임 알고리즘 연동 */
+        document.querySelectorAll('[data-select-algo]').forEach(el => {
+            el.addEventListener('click', () => {
+                const algo = el.dataset.selectAlgo;
+                setAlgo(algo);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

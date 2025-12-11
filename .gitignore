@@ -1,0 +1,8 @@
+# System Files
+Thumbs.db
+Desktop.ini
+
+# Logs and Temporary Files
+*.log
+*.tmp
+*.bak
